@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>西部工作台</title>
+    <link rel="icon" href="images/志愿者logo.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            /* 定义背景图变量，JS动态修改 */
+            --bg-image: url('https://tu.ltyuanfang.cn/api/fengjing.php');
+        }
+
+        body {
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            padding: 20px;
+            transition: background-image 1s ease-in-out;
+        }
+
+        /* 主磨砂容器 */
+        .workbench {
+            width: calc(100vw - 40px);
+            height: calc(100vh - 70px);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* 气象预警弹窗样式 */
+        .weather-alert {
+            position: absolute;
+            top: 140px;
+            right: 40px;
+            width: 420px;
+            padding: 18px 22px;
+            border-radius: 14px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+            color: #fff;
+            z-index: 999;
+            display: none;
+        }
+
+        .alert-red {
+            background: rgba(220, 30, 30, 0.7);
+            border: 1px solid rgba(255, 100, 100, 0.4);
+        }
+
+        .alert-orange {
+            background: rgba(240, 110, 0, 0.7);
+            border: 1px solid rgba(255, 160, 80, 0.4);
+        }
+
+        .alert-yellow {
+            background: rgba(220, 180, 0, 0.7);
+            border: 1px solid rgba(255, 220, 80, 0.4);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .alert-close {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .alert-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 顶部头部栏 */
+        .header {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.25));
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .header img.logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .slogan {
+            flex: 1;
+            margin-left: 20px;
+            font-size: 32px;
+            color: #ed2c25;
+            font-weight: bold;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1.2px;
+        }
+
+        .logo:hover {
+            cursor: pointer;
+            user-select: none;
+            transform: scale(1.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .slogan:hover {
+            cursor: pointer;
+            user-select: none;
+            transform: scale(1.02);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .weather-img {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+            cursor: pointer;
+        }
+
+        .weather-info-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        #dateTime {
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        #weather {
+            font-size: 13px;
+        }
+
+        .forecast-pop {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            padding: 16px;
+            background: #34495e;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            z-index: 998;
+            display: none;
+            white-space: nowrap;
+        }
+
+        /* 鼠标悬浮天气图标时显示预报 */
+        .header-right:hover .forecast-pop {
+            display: block;
+            margin-top: 40px;
+        }
+
+        .forecast-box {
+            display: flex;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .day-item {
+            min-width: 70px;
+            text-align: center;
+            padding: 4px;
+            background: #5da0a2;
+            border-radius: 10px;
+        }
+
+        .day-img {
+            width: 25px;
+            height: 25px;
+            margin: 0 auto 5px;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+        }
+
+        /* ========== 重写主体6分区网格布局 ========== */
+        .content {
+            flex: 1;
+            display: grid;
+            padding: 20px;
+            grid-template-columns: 20% 39% 41%;
+            grid-template-rows: 16% 34% 50%;
+            gap: 20px;
+        }
+        /* 卡片通用样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fff;
+            padding: 10px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        .card-title {
+            font-size: 20px;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .card-desc {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* 1.左侧竖通栏：常用软件 */
+        .card-software {
+            background: #f3818144;
+            backdrop-filter: blur(5px);
+            grid-column: 1 / 2;
+            grid-row: 1 / 4;
+            height: calc(100% - 40px);
+        }
+        /* 2.中间上方：工作总文件夹 */
+        .card-workall {
+            background: #aa96da44;
+            backdrop-filter: blur(5px);
+            grid-column: 2 / 3;
+            grid-row: 1 / 3;
+        }
+        /* 3.中间下方：正在进行的工作 */
+        .card-working {
+            background: #abedd844;
+            backdrop-filter: blur(5px);
+            grid-column: 2 / 3;
+            grid-row: 3 / 4;
+            height: calc(100% - 40px);
+        }
+        /* 4.右上 每日一言 */
+        .card-hitokoto {
+            background: #07689f44;
+            backdrop-filter: blur(5px);
+            grid-column: 3 / 4;
+            grid-row: 1 / 2;
+            width: calc(100% - 40px);
+        }
+        .hitokoto-title {
+            font-size: 16px;
+            font-weight: normal;
+            color: #c6f1e7;
+        }
+        .hitokoto-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #eee;
+            height: 100%;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 300;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1.2;
+        }
+
+        /* 5.右中上：西部计划日记 & 工作总结 */
+        .card-diary {
+            background: #6c5b7b44;
+            backdrop-filter: blur(5px);
+            grid-column: 3 / 4;
+            grid-row: 2 / 3;
+            width: calc(100% - 40px);
+        }
+        /* 6.右下：今日待办工作 */
+        .card-todo {
+            background: #f7385944;
+            backdrop-filter: blur(5px);
+            grid-column: 3 / 4;
+            grid-row: 3 / 4;
+            width: calc(100% - 40px);
+            height: calc(100% - 40px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="workbench" id="mainWrap">
+        <!-- 气象预警弹窗 -->
+        <div class="weather-alert" id="alertBox">
+            <div class="alert-header">
+                <div class="alert-title">气象预警通知</div>
+                <div class="alert-close" id="closeAlert">×</div>
+            </div>
+            <div class="alert-content" id="alertText"></div>
+        </div>
+
+        <div class="header">
+            <img class="logo" src="images/团徽.png" alt="团徽" onclick="window.open('https://zhtj.youth.cn/zhtj/','_blank')">
+            <img class="logo" src="images/志愿者logo.png" alt="西部志愿者logo" onclick="window.open('https://west.youth.cn/home','_blank')">
+            <span class="slogan"  onclick="window.open('https://xibu.youth.cn/','_blank')">到西部去，到基层去，到祖国和人民最需要的地方去！</span>
+
+            <div class="header-right">
+                <img id="weatherIcon" class="weather-img" src="images/weather/default.png" alt="天气图标">
+                <div class="weather-info-wrap">
+                    <span id="dateTime"></span>
+                    <span id="weather">正在加载天气...</span>
+                </div>
+                <div class="forecast-pop" id="forecastPop">
+                    <div class="forecast-box" id="forecastWrap"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主体6分区 -->
+        <div class="content">
+            <!-- 1.左侧竖长条：常用软件 -->
+            <div class="card card-software">
+                <div class="card-title">💻 常用软件</div>
+                <div class="card-desc">微信、WPS、浏览器、各类办公快捷方式存放区</div>
+            </div>
+            <!-- 2.中间上方：工作总文件夹 -->
+            <div class="card card-workall">
+                <div class="card-title">📂 工作总文件夹</div>
+                <div class="card-desc">全部驻村、走访、政策、会议归档总目录</div>
+            </div>
+            <!-- 3.中间下方：正在进行的工作 -->
+            <div class="card card-working">
+                <div class="card-title">🔧 正在进行的工作</div>
+                <div class="card-desc">当下推进的入户走访、材料申报、志愿活动项目</div>
+            </div>
+            <!-- 4.每日一言占位框 -->
+            <div class="card card-hitokoto">
+                <div class="hitokoto-title">每日一言</div>
+                <span class="hitokoto-text" id="hitokoto">正在加载今日一言...</span>
+            </div>
+            <!-- 5.右中上：西部计划日记 & 工作总结 -->
+            <div class="card card-diary">
+                <div class="card-title">📝 西部计划日记 & 工作总结</div>
+                <div class="card-desc">下乡随笔、月度思想汇报、基层感悟归档</div>
+            </div>
+            <!-- 6.右下：今日待办工作 -->
+            <div class="card card-todo">
+                <div class="card-title">✅ 今日待办工作</div>
+                <div class="card-desc">每日任务清单、会议安排、材料整理计划</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM缓存
+        const timeDom = document.getElementById('dateTime');
+        const weatherDom = document.getElementById('weather');
+        const weatherIcon = document.getElementById('weatherIcon');
+        const forecastWrap = document.getElementById('forecastWrap');
+        const alertBox = document.getElementById('alertBox');
+        const alertText = document.getElementById('alertText');
+        const closeAlert = document.getElementById('closeAlert');
+        const mainWrap = document.getElementById('mainWrap');
+        const hitokotoDom = document.getElementById('hitokoto');
+
+        // 关闭预警弹窗
+        closeAlert.onclick = () => alertBox.style.display = 'none';
+
+        // 1. 实时时间格式化
+        function getFormatTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            return `${year}年${month}月${day}日 ${h}:${m}:${s}`;
+        }
+        timeDom.textContent = getFormatTime();
+        setInterval(() => timeDom.textContent = getFormatTime(), 1000);
+
+        // 2. 天气图标加载失败兜底
+        function handleWeatherIconError(img) {
+            img.src = "images/weather/default.png";
+        }
+        weatherIcon.onerror = () => handleWeatherIconError(weatherIcon);
+
+        // 3. 天气API参数
+        const APPID = "69475998";
+        const APPSECRET = "rldbX1Zl";
+        const CITY_NAME = "观山湖";
+        const WEATHER_API_URL = `https://gfeljm.tianqiapi.com/free/v2031?appid=${APPID}&appsecret=${APPSECRET}&hours=1&city=${CITY_NAME}`;
+
+        // 渲染气象预警
+        function renderAlert(alarmList) {
+            if (!alarmList || alarmList.length === 0) {
+                alertBox.style.display = 'none';
+                return;
+            }
+            const localAlarm = alarmList.find(item => item.alarm_title.includes("观山湖")) || alarmList[0];
+            let levelClass = "alert-yellow";
+            if (localAlarm.alarm_level === "红色") levelClass = "alert-red";
+            if (localAlarm.alarm_level === "橙色") levelClass = "alert-orange";
+
+            alertBox.className = `weather-alert ${levelClass}`;
+            alertText.innerHTML = `<strong>${localAlarm.alarm_title}</strong><br>${localAlarm.alarm_content}`;
+            alertBox.style.display = 'block';
+        }
+
+        // 渲染7日预报
+        function renderForecast(weekList) {
+            let html = "";
+            weekList.forEach(day => {
+                const imgSrc = `images/weather/${day.wea_img}.png`;
+                html += `
+                    <div class="day-item">
+                        <img class="day-img" src="${imgSrc}" onerror="this.src='images/weather/default.png'">
+                        <div class="day-week">${day.day.split('（')[0]}</div>
+                        <div>${day.wea}</div>
+                        <div class="day-temp">${day.tem2}~${day.tem1}℃</div>
+                    </div>
+                `;
+            });
+            forecastWrap.innerHTML = html;
+        }
+
+        // 4. 请求泽普天气
+        async function fetchZepuWeather() {
+            try {
+                const res = await fetch(WEATHER_API_URL);
+                const data = await res.json();
+                const dayData = data.day;
+
+                const weaText = dayData.wea;
+                const tempNow = dayData.tem;
+                const tempMin = dayData.tem2;
+                const tempMax = dayData.tem1;
+                const humidity = dayData.humidity;
+                const uv = dayData.uvDescription;
+                weatherDom.textContent = `观山湖｜${weaText} ${tempMin}~${tempMax}℃ 实时${tempNow}℃ 湿度${humidity} 紫外线${uv}`;
+
+                const imgName = dayData.wea_img || "default";
+                weatherIcon.src = `images/weather/${imgName}.png`;
+
+                renderAlert(data.alarm);
+                renderForecast(data.week);
+
+            } catch (err) {
+                weatherDom.textContent = "天气加载失败，本地打开存在跨域限制";
+                console.error("天气接口请求异常：", err);
+            }
+        }
+
+        // 5. 获取每日一言
+        function getHitokoto() {
+            fetch('https://luckycola.com.cn/tools/yiyan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ColaKey: "5zmixwAgsJxYeg1784357011649l1sVn6UroB"
+                })
+            })
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData.code === 0) {
+                        const info = resData.data;
+                        hitokotoDom.innerHTML = `「${info.note}」<br>${info.content}`;
+                    } else {
+                        hitokotoDom.innerHTML = `「奔赴西部，不负韶华。」<br>Head westward, and make the most of your youth.`;
+                    }
+                })
+                .catch(error => {
+                    hitokotoDom.innerHTML = `「奔赴西部，不负韶华。」<br>Head westward, and make the most of your youth.`;
+                    console.error("每日一言接口异常：", error);
+                });
+        }
+
+        // ===================== 新增：每分钟自动切换背景图 =====================
+        function autoChangeBg() {
+            // 时间戳参数，清除浏览器缓存，保证每次加载新图
+            const stamp = Date.now();
+            // 远方4K风景接口
+            const bgApi = `https://tu.ltyuanfang.cn/api/fengjing.php?t=${stamp}`;
+
+            // 修改CSS变量更新背景
+            document.body.style.setProperty('--bg-image', `url(${bgApi})`);
+            console.log("已更新随机风景背景");
+        }
+        // 页面打开立刻加载第一张图
+        autoChangeBg();
+        // 每60000毫秒 = 1分钟切换一次
+        setInterval(autoChangeBg, 60000);
+
+        // 初始化页面数据
+        fetchZepuWeather();
+        getHitokoto();
+
+        // 定时刷新任务
+        setInterval(fetchZepuWeather, 1800000); // 30分钟更新天气
+        setInterval(getHitokoto, 3600000); // 1小时刷新名言
+
+        // 点击logo打开浏览器进入首页（新标签页）
+        const logo = document.querySelector('.logo');
+        logo.addEventListener('click', () => {
+            window.open('https://west.youth.cn/home', '_blank');
+        });
+    </script>
+</body>
+
+</html>
