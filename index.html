@@ -295,16 +295,14 @@
             color: #c6f1e7;
         }
         .hitokoto-text {
-            display: flex;
+            width: 100%;
+            text-align: center;
             align-items: center;
             justify-content: center;
             color: #eee;
-            height: 100%;
-            width: 100%;
             font-size: 18px;
             font-weight: 300;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-            line-height: 1.2;
         }
 
         /* 5.右中上：西部计划日记 & 工作总结 */
@@ -375,7 +373,7 @@
             <!-- 4.每日一言占位框 -->
             <div class="card card-hitokoto">
                 <div class="hitokoto-title">每日一言</div>
-                <span class="hitokoto-text" id="hitokoto">正在加载今日一言...</span>
+                <div class="hitokoto-text" id="hitokoto">正在加载今日一言...<br>Loading...</div>
             </div>
             <!-- 5.右中上：西部计划日记 & 工作总结 -->
             <div class="card card-diary">
@@ -506,13 +504,13 @@
                 .then(resData => {
                     if (resData.code === 0) {
                         const info = resData.data;
-                        hitokotoDom.innerHTML = `「${info.note}」<br>${info.content}`;
+                        hitokotoDom.innerHTML = `<div class="hitokoto-text">「${info.note}」</div><div class="hitokoto-text">${info.content}</div>`;
                     } else {
-                        hitokotoDom.innerHTML = `「奔赴西部，不负韶华。」<br>Head westward, and make the most of your youth.`;
+                        hitokotoDom.innerHTML = `<div class="hitokoto-text">「奔赴西部，不负韶华。」</div><div class="hitokoto-text">Head westward, and make the most of your youth.</div>`;
                     }
                 })
                 .catch(error => {
-                    hitokotoDom.innerHTML = `「奔赴西部，不负韶华。」<br>Head westward, and make the most of your youth.`;
+                    hitokotoDom.innerHTML = `<div class="hitokoto-text">「奔赴西部，不负韶华。」</div><div class="hitokoto-text">Head westward, and make the most of your youth.</div>`;
                     console.error("每日一言接口异常：", error);
                 });
         }
