@@ -20,20 +20,24 @@
             height: 100vh;
             overflow: hidden;
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-            /* 定义背景图变量，JS动态修改 */
-            --bg-image: url('https://tu.ltyuanfang.cn/api/fengjing.php');
+        }
+
+        :root {
+            --bg-img: url('images/bg.jpg');
+            --bg-refresh: 0;
         }
 
         body {
-            background-image: var(--bg-image);
+            padding: 20px;
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            padding: 20px;
             transition: background-image 1s ease-in-out;
+            background-image: var(--bg-img);
+            will-change: background-image;
+            transform: translateZ(calc(var(--bg-refresh) * 1px));
         }
 
-        /* 主磨砂容器 */
         .workbench {
             width: calc(100vw - 40px);
             height: calc(100vh - 70px);
@@ -46,9 +50,9 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            z-index: 10;
         }
 
-        /* 气象预警弹窗样式 */
         .weather-alert {
             position: absolute;
             top: 140px;
@@ -59,7 +63,7 @@
             backdrop-filter: blur(5px);
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
             color: #fff;
-            z-index: 999;
+            z-index: 9999;
             display: none;
         }
 
@@ -107,7 +111,6 @@
             line-height: 1.6;
         }
 
-        /* 顶部头部栏 */
         .header {
             width: 100%;
             height: 100px;
@@ -121,6 +124,8 @@
             border-bottom: 1px solid #ffffff88;
             box-shadow: 0 5px 5px #ffffff88;
             position: relative;
+            z-index: 100;
+            overflow: visible;
         }
 
         .header img.logo {
@@ -162,6 +167,7 @@
             color: #fff;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
             position: relative;
+            overflow: visible;
         }
 
         .weather-img {
@@ -200,16 +206,14 @@
             backdrop-filter: blur(10px);
             border: 1px solid #ffffff88;
             border-radius: 15px;
-            z-index: 998;
+            z-index: 9998;
             display: none;
             white-space: nowrap;
         }
 
-        /* 鼠标悬浮天气图标时显示预报 */
         .header-right:hover .forecast-pop {
             display: block;
             margin-top: 40px;
-
         }
 
         .forecast-box {
@@ -233,7 +237,6 @@
             filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
         }
 
-        /* ========== 重写主体6分区网格布局 ========== */
         .content {
             flex: 1;
             display: grid;
@@ -241,9 +244,10 @@
             grid-template-columns: 20% 39% 41%;
             grid-template-rows: 16% 34% 50%;
             gap: 20px;
+            z-index: 1;
+            position: relative;
         }
 
-        /* 卡片通用样式 */
         .card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(5px);
@@ -254,6 +258,8 @@
             padding: 10px;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
         }
 
         .card-title {
@@ -268,7 +274,6 @@
             opacity: 0.85;
         }
 
-        /* 1.左侧竖通栏：常用软件 */
         .card-software {
             background-image: linear-gradient(#f7797d66, #fbd78666, #c6ffdd66);
             backdrop-filter: blur(5px);
@@ -277,7 +282,6 @@
             height: calc(100% - 40px);
         }
 
-        /* 2.中间上方：工作总文件夹 */
         .card-workall {
             background-image: linear-gradient(#fc00ff66, #00dbde66);
             backdrop-filter: blur(5px);
@@ -285,7 +289,6 @@
             grid-row: 1 / 3;
         }
 
-        /* 3.中间下方：正在进行的工作 */
         .card-working {
             background-image: linear-gradient(#fc00ff66, #00dbde66);
             backdrop-filter: blur(5px);
@@ -294,7 +297,6 @@
             height: calc(100% - 40px);
         }
 
-        /* 4.右上 每日一言 */
         .card-hitokoto {
             background-image: linear-gradient(to right, #00c9ff66, #92fe9d66);
             backdrop-filter: blur(5px);
@@ -304,9 +306,37 @@
         }
 
         .hitokoto-title {
-            font-size: 16px;
-            font-weight: 300;
+            position: relative;
+            width: 100%;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        #timeTipText {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            line-height: 25px;
+            font-size: 14px;
+            text-align: center;
             color: #ffffff;
+            font-weight: 300;
+            padding-right: 8px;
+            z-index: 2;
+        }
+
+        #timeProgressBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-image: linear-gradient(to right, #1fddff, #ff4b1f);
+            transition: width 0.5s ease;
+            z-index: 1;
         }
 
         .hitokoto-text {
@@ -320,7 +350,6 @@
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* 5.右中上：西部计划日记 & 工作总结 */
         .card-diary {
             background-image: linear-gradient(#00c3ff66, #ffff1c66);
             backdrop-filter: blur(5px);
@@ -329,7 +358,6 @@
             width: calc(100% - 40px);
         }
 
-        /* 6.右下：今日待办工作 */
         .card-todo {
             background-image: linear-gradient(#fc00ff66, #00dbde66);
             backdrop-filter: blur(5px);
@@ -343,7 +371,6 @@
 
 <body>
     <div class="workbench" id="mainWrap">
-        <!-- 气象预警弹窗 -->
         <div class="weather-alert" id="alertBox">
             <div class="alert-header">
                 <div class="alert-title">气象预警通知</div>
@@ -372,34 +399,30 @@
             </div>
         </div>
 
-        <!-- 主体6分区 -->
         <div class="content">
-            <!-- 1.左侧竖长条：常用软件 -->
             <div class="card card-software">
                 <div class="card-title">💻 常用软件</div>
                 <div class="card-desc">微信、WPS、浏览器、各类办公快捷方式</div>
             </div>
-            <!-- 2.中间上方：工作总文件夹 -->
             <div class="card card-workall">
                 <div class="card-title">📂 工作总文件夹</div>
                 <div class="card-desc">全部驻村、走访、政策、会议归档总目录</div>
             </div>
-            <!-- 3.中间下方：正在进行的工作 -->
             <div class="card card-working">
                 <div class="card-title">🔧 正在进行的工作</div>
                 <div class="card-desc">当下推进的入户走访、材料申报、志愿活动项目</div>
             </div>
-            <!-- 4.每日一言占位框 -->
             <div class="card card-hitokoto">
-                <div class="hitokoto-title">每日一言</div>
+                <div class="hitokoto-title">
+                    <div id="timeTipText"></div>
+                    <div id="timeProgressBar"></div>
+                </div>
                 <div class="hitokoto-text" id="hitokoto">正在加载今日一言...<br>Loading...</div>
             </div>
-            <!-- 5.右中上：西部计划日记 & 工作总结 -->
             <div class="card card-diary">
                 <div class="card-title">📝 西部计划日记 & 工作总结</div>
                 <div class="card-desc">下乡随笔、月度思想汇报、基层感悟归档</div>
             </div>
-            <!-- 6.右下：今日待办工作 -->
             <div class="card card-todo">
                 <div class="card-title">✅ 今日待办工作</div>
                 <div class="card-desc">每日任务清单、会议安排、材料整理计划</div>
@@ -415,7 +438,6 @@
         const alertBox = document.getElementById('alertBox');
         const alertText = document.getElementById('alertText');
         const closeAlert = document.getElementById('closeAlert');
-        const mainWrap = document.getElementById('mainWrap');
         const hitokotoDom = document.getElementById('hitokoto');
 
         closeAlert.onclick = () => alertBox.style.display = 'none';
@@ -525,21 +547,112 @@
                 });
         }
 
+        let refreshCount = 0;
         function autoChangeBg() {
-            const stamp = Date.now();
+            const totalImg = 159;
+            const randomNum = Math.floor(Math.random() * totalImg) + 1;
+            const localImg = `images/background/bg_${randomNum}.jpg`;
+            document.documentElement.style.setProperty('--bg-img', `url(${localImg})`);
+            refreshCount += 1;
+            document.documentElement.style.setProperty('--bg-refresh', refreshCount);
 
-            // ========== 方案1：在线随机图 ==========
-            // const bgApi = `https://tu.ltyuanfang.cn/api/fengjing.php?t=${stamp}`;
-            // const bgUrl = `url(${bgApi})`;
-
-            // ========== 方案2：本地随机图 ==========
-            const randomNum = String(Math.floor(Math.random() * 3) + 1).padStart(2, '0');
-            const localImg = `images/background/${randomNum}.jpg`;
-            const bgUrl = `url(${localImg})`;
-
-            document.body.style.setProperty('--bg-image', bgUrl);
-            console.log("已更新背景图");
+            const testImg = new Image();
+            testImg.src = localImg;
+            testImg.onerror = () => {
+                document.documentElement.style.setProperty('--bg-img', "url('images/bg.jpg')");
+            };
         }
+        const timeTipText = document.getElementById('timeTipText');
+        const timeProgressBar = document.getElementById('timeProgressBar');
+
+        function getWorkTimeConfig(month) {
+            // 5-9月夏令时，10-4月冬令时
+            if (month >= 5 && month <= 9) {
+                return {
+                    morningStart: 10 * 60,    // 10:00 上班
+                    noonStart: 14 * 60,       // 14:00 午休
+                    afternoonStart: 16 * 60,  // 16:00 下午上班
+                    workEnd: 20 * 60          // 20:00 下班
+                }
+            } else {
+                return {
+                    morningStart: 10 * 60,
+                    noonStart: 14 * 60,
+                    afternoonStart: 15 * 60 + 30,
+                    workEnd: 19 * 60 + 30
+                }
+            }
+        }
+
+        function formatMinute(totalMin) {
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            return `${h}小时${m}分钟`;
+        }
+
+        function updateCountDown() {
+            const now = new Date();
+            const week = now.getDay(); // 0周日 1周一...6周六
+            const month = now.getMonth() + 1;
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const nowTotalMin = h * 60 + m;
+            const cfg = getWorkTimeConfig(month);
+
+            if (week === 0 || week === 6) {
+                timeTipText.textContent = "今天是周末，好好休息吧！";
+                timeProgressBar.style.width = "0%";
+                return;
+            }
+
+            const morningWorkMin = cfg.noonStart - cfg.morningStart;
+            const afternoonWorkMin = cfg.workEnd - cfg.afternoonStart;
+            const allWorkTotal = morningWorkMin + afternoonWorkMin;
+
+            let tip = "";
+            let workedMin = 0;
+
+            if (nowTotalMin < cfg.morningStart - 60) {
+                tip = "现在是休息时间，养足精神等待上班";
+                workedMin = 0;
+            }
+            else if (nowTotalMin >= cfg.morningStart - 60 && nowTotalMin < cfg.morningStart) {
+                const leftMin = cfg.morningStart - nowTotalMin;
+                tip = `马上上班啦，加油哦！距离上班还有${formatMinute(leftMin)}`;
+                workedMin = 0;
+            }
+            else if (nowTotalMin >= cfg.morningStart && nowTotalMin < cfg.noonStart) {
+                workedMin = nowTotalMin - cfg.morningStart;
+                const leftMin = cfg.noonStart - nowTotalMin;
+                tip = `上午在岗，距离午休还有${formatMinute(leftMin)}`;
+            }
+            else if (nowTotalMin >= cfg.noonStart && nowTotalMin < cfg.afternoonStart) {
+                workedMin = morningWorkMin;
+                tip = "中午啦，记得好好吃饭！";
+            }
+            else if (nowTotalMin >= cfg.afternoonStart && nowTotalMin < cfg.workEnd - 60) {
+                workedMin = morningWorkMin + (nowTotalMin - cfg.afternoonStart);
+                const leftMin = cfg.workEnd - nowTotalMin;
+                tip = `在岗中，离下班还有${formatMinute(leftMin)}`;
+            }
+            else if (nowTotalMin >= cfg.workEnd - 60 && nowTotalMin < cfg.workEnd) {
+                workedMin = morningWorkMin + (nowTotalMin - cfg.afternoonStart);
+                const leftMin = cfg.workEnd - nowTotalMin;
+                tip = `再坚持一下，马上下班啦！距离下班还有${formatMinute(leftMin)}`;
+            }
+            else {
+                tip = "下班啦，今天辛苦啦！";
+                workedMin = allWorkTotal;
+            }
+
+            const progress = (workedMin / allWorkTotal) * 100;
+            timeTipText.textContent = tip;
+            timeProgressBar.style.width = progress + "%";
+        }
+
+        updateCountDown();
+        setInterval(updateCountDown, 1000);
+
         autoChangeBg();
         setInterval(autoChangeBg, 600000);
 
